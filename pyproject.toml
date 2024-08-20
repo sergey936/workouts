@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "sport"
+version = "0.1.0"
+description = ""
+authors = ["sergey936 <s.suslakov@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+sqlalchemy = "^2.0.32"
+fastapi = "^0.112.1"
+flake8 = "^7.1.1"
+flake8-bugbear = "^24.8.19"
+flake8-builtins = "^2.5.0"
+pep8-naming = "^0.14.1"
+flake8-commas = "^4.0.0"
+flake8-import-order = "^0.18.2"
+ruff = "^0.6.1"
+pre-commit = "^3.8.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,7 @@
+fail_fast: false
+exclude: ^.*\b(migrations)\b.*$
+repos:
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.6.1
+    hooks:
+    -   id: ruff
