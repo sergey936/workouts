@@ -20,7 +20,7 @@ class User(BaseEntity):
     role: Role = Role.user
     is_active: bool = True
 
-    def create_user(
+    def Create_user(
             self,
             name: Name,
             surname: Surname,
