@@ -1,15 +1,16 @@
 import re
-
 from dataclasses import dataclass
 
-from domain.exceptions.user import EmptyValueException, TooLongValueException, EmptyEmailException, \
-    InvalidEmailException, EmptyPasswordException, UnhashedPasswordException
+from domain.exceptions.user import (EmptyEmailException,
+                                    EmptyPasswordException,
+                                    EmptyValueException, InvalidEmailException,
+                                    TooLongValueException,
+                                    UnhashedPasswordException)
 from domain.values.base import BaseValueObject
 
 
 @dataclass(frozen=True)
 class Name(BaseValueObject):
-
     def validate(self):
         if not self.value:
             raise EmptyValueException(text='Name')
@@ -58,7 +59,7 @@ class Email(BaseValueObject):
 
     def _is_valid_email(self) -> bool:
         email_regex = re.compile(
-            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
         )
         return re.match(email_regex, str(self.value)) is not None
 

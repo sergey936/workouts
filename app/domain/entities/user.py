@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 
 from domain.entities.base import BaseEntity
-from domain.events.user import NewUserCreatedEvent, UserChangeEmailEvent, UserDeletedEvent, \
-    UserChangePasswordEvent, UserEditEvent
+from domain.events.user import (NewUserCreatedEvent, UserChangeEmailEvent,
+                                UserChangePasswordEvent, UserDeletedEvent,
+                                UserEditEvent)
 from domain.values.role import Role
-from domain.values.user import Name, Surname, Patronymic, Email, Password
+from domain.values.user import Email, Name, Password, Patronymic, Surname
 
 
 @dataclass
@@ -17,47 +18,54 @@ class User(BaseEntity):
     password: Password
     telegram_id: str | None = None
 
-    role: Role = Role.user
+    role: Role = Role.USER
     is_active: bool = True
 
+    @classmethod
     def create_user(
-            self,
-            name: Name,
-            surname: Surname,
-            patronymic: Patronymic,
-            email: Email,
-            telegram_id: str | None,
-            password: Password,
+            cls,
+            name: str,
+            surname: str,
+            patronymic: str,
+            email: str,
+            password: str,
     ) -> 'User':
-        self._events.append(NewUserCreatedEvent)
-        return User(
+        name = Name(name)
+        surname = Surname(surname)
+        patronymic = Patronymic(patronymic)
+        email = Email(email)
+        password = Password(password)
+
+        new_user = User(
             name=name,
             surname=surname,
             patronymic=patronymic,
             email=email,
             password=password,
-            telegram_id=telegram_id,
         )
+        new_user.register_event(NewUserCreatedEvent)
+
+        return new_user
 
     def change_password(self, password: Password) -> 'User':
         self.password = password
-        self._events.append(UserChangePasswordEvent)
+        self.register_event(UserChangePasswordEvent)
 
     def change_email(self, email: Email) -> 'User':
         self.email = email
-        self._events.append(UserChangeEmailEvent)
+        self.register_event(UserChangeEmailEvent)
 
     def delete_user(self) -> None:
         self.is_active = False
-        self._events.append(UserDeletedEvent)
+        self.register_event(UserDeletedEvent)
 
     def edit_user(
             self,
             name: Name | None = None,
             surname: Surname | None = None,
-            patronymic: Patronymic | None = None
+            patronymic: Patronymic | None = None,
     ):
         self.name = name if name else self.name
         self.surname = surname if surname else self.surname
         self.patronymic = patronymic if patronymic else self.patronymic
-        self._events.append(UserEditEvent)
+        self.register_event(UserEditEvent)
