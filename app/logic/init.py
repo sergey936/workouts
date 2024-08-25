@@ -5,9 +5,14 @@ from infrastructure.db.main import build_sa_engine
 from infrastructure.repositories.user.base import BaseUserRepository
 from infrastructure.repositories.user.sqlaclhemy import \
     SQLAlchemyUserRepository
+from logic.commands.auth import (AuthenticateUserCommand,
+                                 AuthenticateUserCommandHandler,
+                                 CreateAccessTokenCommand,
+                                 CreateAccessTokenCommandHandler)
 from logic.commands.user import (CreateNewUserCommand,
                                  CreateNewUserCommandHandler)
 from logic.mediator.base import Mediator
+from logic.queries.user import GetCurrentUserQuery, GetCurrentUserQueryHandler
 from punq import Container, Scope
 from settings.config import Config
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -39,17 +44,55 @@ def init_container() -> Container:
     def init_mediator() -> Mediator:
         mediator = Mediator()
 
-        # create command handlers
+        # create Command handlers
+        # User
         create_new_user_command_handler = CreateNewUserCommandHandler(
             _mediator=mediator,
             user_repository=container.resolve(BaseUserRepository),
             password_service=container.resolve(PasswordService),
         )
+        # Auth
 
-        # register commands
+        authenticate_user_command_handler = AuthenticateUserCommandHandler(
+            _mediator=mediator,
+            user_repository=container.resolve(BaseUserRepository),
+            password_service=container.resolve(PasswordService),
+        )
+
+        create_access_token_command_handler = CreateAccessTokenCommandHandler(
+            _mediator=mediator,
+            config=config,
+        )
+
+        # create Query handlers
+        # User
+        get_current_user_query_handler = GetCurrentUserQueryHandler(
+            user_repository=container.resolve(BaseUserRepository),
+            config=config,
+        )
+
+        # register Commands
+        # User
         mediator.register_command(
             CreateNewUserCommand,
             [create_new_user_command_handler],
+        )
+
+        # Auth
+        mediator.register_command(
+            AuthenticateUserCommand,
+            [authenticate_user_command_handler],
+        )
+
+        mediator.register_command(
+            CreateAccessTokenCommand,
+            [create_access_token_command_handler],
+        )
+        # register Queries
+        # User
+        mediator.register_query(
+            GetCurrentUserQuery,
+            get_current_user_query_handler,
         )
 
         return mediator

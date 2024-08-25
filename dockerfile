@@ -6,7 +6,7 @@ WORKDIR /app
 
 ADD pyproject.toml /app
 
-RUN pip install --upgrade pip
+run pip install --upgrade pip
 RUN pip install poetry
 
 

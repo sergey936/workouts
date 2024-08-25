@@ -1,3 +1,4 @@
+from application.api.auth.handlers import router as AuthRouter
 from application.api.user.handlers import router as UserRouter
 from fastapi import FastAPI
 from logic.init import get_container
@@ -11,7 +12,9 @@ def init_api_v1() -> FastAPI:
         version='1.0.0',
         debug=True,
     )
-    app.include_router(router=UserRouter, tags=['users'])
     app.dependency_overrides[Container] = get_container
+
+    app.include_router(router=UserRouter, tags=['Users'])
+    app.include_router(router=AuthRouter, tags=['Auth'])
 
     return app
