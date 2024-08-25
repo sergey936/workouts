@@ -1,5 +1,7 @@
+from application.api.auth.utils import get_current_user
 from application.api.user.schemas import (UserCreateResponseSchema,
-                                          UserCreateSchema)
+                                          UserCreateSchema, UserResponseSchema)
+from domain.entities.user import User
 from domain.exceptions.base import ApplicationException
 from fastapi import APIRouter, Depends, HTTPException, status
 from logic.commands.user import CreateNewUserCommand
@@ -8,7 +10,7 @@ from punq import Container
 
 router = APIRouter(
     prefix='/user',
-    tags=['users'],
+    tags=['Users'],
 )
 
 
@@ -37,3 +39,12 @@ async def create_user_handler(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': error.message})
 
     return UserCreateResponseSchema()
+
+
+@router.get(
+    path='/me',
+    summary='Get current authenticated user',
+    response_model=UserResponseSchema,
+)
+async def get_current_user(user: User = Depends(get_current_user)) -> UserResponseSchema:
+    return UserResponseSchema.from_entity(user=user)
