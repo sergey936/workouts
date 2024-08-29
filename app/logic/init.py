@@ -10,7 +10,9 @@ from logic.commands.auth import (AuthenticateUserCommand,
                                  CreateAccessTokenCommand,
                                  CreateAccessTokenCommandHandler)
 from logic.commands.user import (CreateNewUserCommand,
-                                 CreateNewUserCommandHandler)
+                                 CreateNewUserCommandHandler,
+                                 DeleteUserCommand, DeleteUserCommandHandler,
+                                 UpdateUserCommand, UpdateUserCommandHandler)
 from logic.mediator.base import Mediator
 from logic.queries.user import GetCurrentUserQuery, GetCurrentUserQueryHandler
 from punq import Container, Scope
@@ -51,8 +53,17 @@ def init_container() -> Container:
             user_repository=container.resolve(BaseUserRepository),
             password_service=container.resolve(PasswordService),
         )
-        # Auth
 
+        delete_user_command_handler = DeleteUserCommandHandler(
+            _mediator=mediator,
+            user_repository=container.resolve(BaseUserRepository),
+        )
+        update_user_command_handler = UpdateUserCommandHandler(
+            _mediator=mediator,
+            user_repository=container.resolve(BaseUserRepository),
+        )
+
+        # Auth
         authenticate_user_command_handler = AuthenticateUserCommandHandler(
             _mediator=mediator,
             user_repository=container.resolve(BaseUserRepository),
@@ -76,6 +87,14 @@ def init_container() -> Container:
         mediator.register_command(
             CreateNewUserCommand,
             [create_new_user_command_handler],
+        )
+        mediator.register_command(
+            DeleteUserCommand,
+            [delete_user_command_handler],
+        )
+        mediator.register_command(
+            UpdateUserCommand,
+            [update_user_command_handler],
         )
 
         # Auth

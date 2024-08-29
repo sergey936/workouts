@@ -6,7 +6,7 @@ from infrastructure.repositories.base import SQLAlchemyRepository
 from infrastructure.repositories.converters.user import (
     convert_user_db_model_to_entity, convert_user_entity_to_db_model)
 from infrastructure.repositories.user.base import BaseUserRepository
-from sqlalchemy import select
+from sqlalchemy import delete, select, update
 
 
 @dataclass
@@ -26,3 +26,25 @@ class SQLAlchemyUserRepository(SQLAlchemyRepository, BaseUserRepository):
 
             if user:
                 return convert_user_db_model_to_entity(user=user)
+
+    async def delete_user_by_id(self, user_id: str) -> None:
+        async with self._session() as session:
+            stmt = delete(UserModel).where(UserModel.id == user_id)
+            await session.execute(stmt)
+            await session.commit()
+
+    async def update_user(
+            self,
+            user_id: str,
+            name: str | None,
+            surname: str | None,
+            patronymic: str | None,
+    ) -> None:
+        async with self._session() as session:
+            stmt = update(UserModel).where(UserModel.id == user_id).values(
+                name=name,
+                surname=surname,
+                patronymic=patronymic,
+            )
+            await session.execute(stmt)
+            await session.commit()

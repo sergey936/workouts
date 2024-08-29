@@ -17,6 +17,9 @@ class Like(BaseValueObject):
             raise NegativeLikeException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return int(self.value)
 
 
@@ -30,4 +33,7 @@ class DisLike(BaseValueObject):
             raise NegativeDislikeException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return int(self.value)

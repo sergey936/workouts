@@ -39,5 +39,23 @@ class UserCreateSchema(BaseModel):
     password: str
 
 
+class UpdateUserRequestSchema(BaseModel):
+    name: str | None
+    surname: str | None
+    patronymic: str | None
+
+
+class UserTelegramIdResponseSchema(BaseModel):
+    telegram_id: int
+
+
 class UserCreateResponseSchema(BaseModel):
     response: str = 'User created.'
+
+
+class DeleteUserResponseSchema(BaseModel):
+    response: str = 'User deleted.'
+
+
+class UserUpdatedResponseSchema(BaseModel):
+    response: str = 'User Updated'
