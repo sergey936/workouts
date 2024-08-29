@@ -61,11 +61,14 @@ class User(BaseEntity):
 
     def edit_user(
             self,
-            name: Name | None = None,
-            surname: Surname | None = None,
-            patronymic: Patronymic | None = None,
+            name: str | None = None,
+            surname: str | None = None,
+            patronymic: str | None = None,
     ):
-        self.name = name if name else self.name
-        self.surname = surname if surname else self.surname
-        self.patronymic = patronymic if patronymic else self.patronymic
+
+        self.name = Name(name) if name else self.name
+        self.surname = Surname(surname) if surname else self.surname
+        self.patronymic = Patronymic(patronymic) if patronymic else self.patronymic
         self.register_event(UserEditEvent)
+
+        return self

@@ -5,6 +5,7 @@ from domain.exceptions.user import (EmptyEmailException,
                                     EmptyPasswordException,
                                     EmptyValueException, InvalidEmailException,
                                     TooLongValueException,
+                                    TooShortValueException,
                                     UnhashedPasswordException)
 from domain.values.base import BaseValueObject
 
@@ -15,10 +16,16 @@ class Name(BaseValueObject):
         if not self.value:
             raise EmptyValueException(text='Name')
 
+        if len(self.value) < 1:
+            raise TooShortValueException(text="Name")
+
         if len(self.value) > 100:
             raise TooLongValueException(text="Name")
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)
 
 
@@ -28,10 +35,16 @@ class Surname(BaseValueObject):
         if not self.value:
             raise EmptyValueException(text="Surname")
 
+        if len(self.value) < 1:
+            raise TooShortValueException(text="Surname")
+
         if len(self.value) > 100:
             raise TooLongValueException(text="Surname")
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)
 
 
@@ -40,6 +53,9 @@ class Patronymic(BaseValueObject):
     def validate(self):
         if not self.value:
             raise EmptyValueException(text="Patronymic")
+
+        if len(self.value) < 1:
+            raise TooShortValueException(text="Patronymic")
 
         if len(self.value) > 100:
             raise TooLongValueException(text="Patronymic")
@@ -64,6 +80,9 @@ class Email(BaseValueObject):
         return re.match(email_regex, str(self.value)) is not None
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)
 
 
@@ -81,4 +100,7 @@ class Password(BaseValueObject):
         return bool(pattern.match(str(self.value)))
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)

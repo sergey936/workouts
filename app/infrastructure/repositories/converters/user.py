@@ -1,4 +1,5 @@
 from domain.entities.user import User as UserEntity
+from domain.values.user import Email, Name, Password, Patronymic, Surname
 from infrastructure.db.models.user import User as UserModel
 
 
@@ -17,12 +18,16 @@ def convert_user_entity_to_db_model(user: UserEntity) -> UserModel:
 
 
 def convert_user_db_model_to_entity(user: UserModel) -> UserEntity:
-    user = UserEntity.create_user(
-        name=user.name,
-        surname=user.surname,
-        patronymic=user.patronymic,
-        email=user.email,
-        password=user.password,
+    user = UserEntity(
+        oid=user.id,
+        name=Name(user.name),
+        surname=Surname(user.surname),
+        patronymic=Patronymic(user.patronymic),
+        email=Email(user.email),
+        password=Password(user.password),
+        telegram_id=user.telegram_id,
+        role=user.role,
+        is_active=user.is_active,
     )
 
     return user

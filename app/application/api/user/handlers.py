@@ -1,10 +1,16 @@
 from application.api.auth.utils import get_current_user
-from application.api.user.schemas import (UserCreateResponseSchema,
-                                          UserCreateSchema, UserResponseSchema)
+from application.api.user.schemas import (DeleteUserResponseSchema,
+                                          UpdateUserRequestSchema,
+                                          UserCreateResponseSchema,
+                                          UserCreateSchema, UserResponseSchema,
+                                          UserUpdatedResponseSchema)
 from domain.entities.user import User
 from domain.exceptions.base import ApplicationException
 from fastapi import APIRouter, Depends, HTTPException, status
-from logic.commands.user import CreateNewUserCommand
+from logic.commands.user import (CreateNewUserCommand, DeleteUserCommand,
+                                 UpdateUserCommand)
+from logic.exceptions.auth import AuthException
+from logic.exceptions.user import NotFoundException
 from logic.mediator.base import Mediator
 from punq import Container
 
@@ -14,8 +20,17 @@ router = APIRouter(
 )
 
 
+@router.get(
+    path='/',
+    summary='Get current authenticated user',
+    response_model=UserResponseSchema,
+)
+async def get_current_user_handler(user: User = Depends(get_current_user)) -> UserResponseSchema:
+    return UserResponseSchema.from_entity(user=user)
+
+
 @router.post(
-    path='/register',
+    path='/',
     summary='Create new user',
     response_model=UserCreateResponseSchema,
 )
@@ -35,16 +50,89 @@ async def create_user_handler(
                 password=schema.password,
             ),
         )
-    except ApplicationException as error:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': error.message})
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
 
     return UserCreateResponseSchema()
 
 
-@router.get(
-    path='/me',
-    summary='Get current authenticated user',
-    response_model=UserResponseSchema,
+@router.delete(
+    path='/',
+    summary='Delete user',
+    response_model=DeleteUserResponseSchema,
 )
-async def get_current_user(user: User = Depends(get_current_user)) -> UserResponseSchema:
-    return UserResponseSchema.from_entity(user=user)
+async def delete_user_handler(
+        user: User = Depends(get_current_user),
+        container: Container = Depends(),
+) -> DeleteUserResponseSchema:
+    mediator: Mediator = container.resolve(Mediator)
+
+    try:
+        await mediator.handle_command(
+            DeleteUserCommand(
+                email=user.email,
+            )
+        )
+
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
+
+    return DeleteUserResponseSchema()
+
+
+@router.put(
+    path='/set-telegram-id',
+    summary='Set telegram id for user',
+    response_model=UserUpdatedResponseSchema,
+)
+async def set_telegram_id_handler(
+        user: User = Depends(get_current_user),
+        container: Container = Depends(),
+) -> UserUpdatedResponseSchema:
+    raise HTTPException(status_code=400, detail="Not working yet")
+
+
+@router.put(
+    path='/name-surname-patronymic',
+    summary='Update (name, surname, patronymic) if exists.',
+    response_model=UserUpdatedResponseSchema,
+)
+async def update_user_handler(
+        schema: UpdateUserRequestSchema,
+        user: User = Depends(get_current_user),
+        container: Container = Depends(),
+) -> UserUpdatedResponseSchema:
+    mediator: Mediator = container.resolve(Mediator)
+
+    try:
+        await mediator.handle_command(
+            UpdateUserCommand(
+                email=user.email.as_generic_type(),
+                name=schema.name,
+                surname=schema.surname,
+                patronymic=schema.patronymic,
+            )
+        )
+
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
+
+    return UserUpdatedResponseSchema()

@@ -22,6 +22,15 @@ class TooLongValueException(ApplicationException):
 
 
 @dataclass
+class TooShortValueException(ApplicationException):
+    text: str
+
+    @property
+    def message(self):
+        return f"{self.text} too short."
+
+
+@dataclass
 class EmptyEmailException(ApplicationException):
 
     @property
@@ -59,5 +68,3 @@ class AccessDeniedException(ApplicationException):
     @property
     def message(self):
         return "You can't do this."
-
-

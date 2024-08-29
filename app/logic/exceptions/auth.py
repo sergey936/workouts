@@ -12,14 +12,6 @@ class AuthException(LogicException):
 
 
 @dataclass
-class UserAlreadyExistsException(AuthException):
-
-    @property
-    def message(self):
-        return 'User already exists.'
-
-
-@dataclass
 class IncorrectCredentialsException(AuthException):
 
     @property
