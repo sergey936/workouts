@@ -25,3 +25,11 @@ class UserNotFoundByEmailException(NotFoundException):
     @property
     def message(self):
         return 'User with that email not found.'
+
+
+@dataclass
+class NotTrainerException(ApplicationException):
+
+    @property
+    def message(self):
+        return 'You not a trainer'

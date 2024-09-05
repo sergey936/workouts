@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from domain.entities.trainer import Trainer
 from domain.entities.user import User
 from domain.service.password import PasswordService
 from infrastructure.repositories.user.base import BaseUserRepository
@@ -89,3 +90,25 @@ class UpdateUserCommandHandler(BaseCommandHandler[UpdateUserCommand, None]):
             surname=edited_user.surname.as_generic_type(),
             patronymic=edited_user.patronymic.as_generic_type(),
         )
+
+
+@dataclass(frozen=True)
+class CreateTrainerCommand(BaseCommand):
+    email: str
+
+
+@dataclass
+class CreateTrainerCommandHandler(BaseCommandHandler[CreateTrainerCommand, User]):
+    user_repository: BaseUserRepository
+
+    async def handle(self, command: CreateTrainerCommand) -> User:
+        user = await self.user_repository.get_user_by_email(email=command.email)
+
+        if not user:
+            raise UserNotFoundByEmailException()
+
+        trainer = Trainer.become_trainer(user=user)
+
+        await self.user_repository.set_trainer_role(user_id=trainer.oid)
+
+        return trainer

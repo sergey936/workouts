@@ -8,10 +8,7 @@ from logic.init import get_container
 from logic.mediator.base import Mediator
 from punq import Container
 
-router = APIRouter(
-    prefix='/auth',
-    tags=['Auth'],
-)
+router = APIRouter()
 
 
 @router.post(

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 
 from domain.entities.user import User as UserEntity
-from infrastructure.db.models import User as UserModel
+from domain.values.role import Role
+from infrastructure.db.models import UserModel
 from infrastructure.repositories.base import SQLAlchemyRepository
 from infrastructure.repositories.converters.user import (
     convert_user_db_model_to_entity, convert_user_entity_to_db_model)
@@ -45,6 +46,14 @@ class SQLAlchemyUserRepository(SQLAlchemyRepository, BaseUserRepository):
                 name=name,
                 surname=surname,
                 patronymic=patronymic,
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    async def set_trainer_role(self, user_id: str) -> None:
+        async with self._session() as session:
+            stmt = update(UserModel).where(UserModel.id == user_id).values(
+                role=Role.TRAINER,
             )
             await session.execute(stmt)
             await session.commit()

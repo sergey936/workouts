@@ -7,10 +7,10 @@ from sqlalchemy import pool
 from alembic import context
 
 from infrastructure.db.models.base import Base
-from infrastructure.db.models.user import User
-from infrastructure.db.models.workout import Workout
-from infrastructure.db.models.comment import Comment
-from infrastructure.db.models.rating import Rating
+from infrastructure.db.models.user import UserModel
+from infrastructure.db.models.workout import WorkoutModel
+from infrastructure.db.models.comment import CommentModel
+from infrastructure.db.models.rating import RatingModel
 
 
 from logic.init import get_container

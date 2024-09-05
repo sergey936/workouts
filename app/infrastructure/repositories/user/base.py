@@ -8,6 +8,10 @@ from domain.entities.user import User as UserEntity
 class BaseUserRepository(ABC):
 
     @abstractmethod
+    async def set_trainer_role(self, user_id: str) -> None:
+        ...
+
+    @abstractmethod
     async def add_user(self, user: UserEntity) -> None:
         ...
 
