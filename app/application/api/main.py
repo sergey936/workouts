@@ -1,5 +1,6 @@
 from application.api.auth.handlers import router as AuthRouter
 from application.api.user.handlers import router as UserRouter
+from application.api.workout.handlers import router as WokroutRouter
 from fastapi import FastAPI
 from logic.init import get_container
 from punq import Container
@@ -14,7 +15,8 @@ def init_api_v1() -> FastAPI:
     )
     app.dependency_overrides[Container] = get_container
 
-    app.include_router(router=UserRouter, tags=['Users'])
-    app.include_router(router=AuthRouter, tags=['Auth'])
+    app.include_router(router=UserRouter, prefix='/users', tags=['Users'])
+    app.include_router(router=AuthRouter, prefix='/auth', tags=['Auth'])
+    app.include_router(router=WokroutRouter, prefix='/Workouts', tags=['Workout'])
 
     return app

@@ -14,22 +14,25 @@ class Workout(BaseEntity):
 
     title: Title
     description: Text
+    file_path: str | None = None
 
     is_active: bool = True
     price: Price | None = None
 
+    @classmethod
     def create_workout(
-            self,
+            cls,
             trainer: Trainer,
-            title: Title,
-            description: Text,
-            price: Price | None,
-    ):
+            title: str,
+            description: str,
+            price: Price | None = None,
+    ) -> 'Workout':
         if trainer.role == Role.TRAINER:
+
             new_workout = Workout(
                 trainer_oid=trainer.oid,
-                title=title,
-                description=description,
+                title=Title(title),
+                description=Text(description),
                 price=price,
             )
             new_workout.register_event(NewWorkoutCreatedEvent)
@@ -52,12 +55,17 @@ class Workout(BaseEntity):
     def edit_workout(
             self,
             trainer: Trainer,
-            title: Title | None = None,
-            description: Text | None = None,
+            title: str | None = None,
+            description: str | None = None,
     ):
-        if trainer.role == Role.TRAINER:
-            if self.trainer_oid == trainer.oid:
-                self.title = title if title else self.title
-                self.description = description if description else self.description
+        if trainer.role != Role.TRAINER:
+            raise AccessDeniedException()
 
-        raise AccessDeniedException()
+        if self.trainer_oid != trainer.oid:
+            raise AccessDeniedException()
+
+        self.title = Title(title) if title else self.title
+        self.description = Text(description) if description else self.description
+
+    def set_file_path(self, file_path: str):
+        self.file_path = file_path

@@ -1,9 +1,9 @@
-from domain.entities.user import User as UserEntity
+from domain.entities.user import User
 from domain.values.user import Email, Name, Password, Patronymic, Surname
-from infrastructure.db.models.user import User as UserModel
+from infrastructure.db.models.user import UserModel
 
 
-def convert_user_entity_to_db_model(user: UserEntity) -> UserModel:
+def convert_user_entity_to_db_model(user: User) -> UserModel:
     return UserModel(
         id=user.oid,
         name=user.name.as_generic_type(),
@@ -17,8 +17,8 @@ def convert_user_entity_to_db_model(user: UserEntity) -> UserModel:
     )
 
 
-def convert_user_db_model_to_entity(user: UserModel) -> UserEntity:
-    user = UserEntity(
+def convert_user_db_model_to_entity(user: UserModel) -> User:
+    user = User(
         oid=user.id,
         name=Name(user.name),
         surname=Surname(user.surname),

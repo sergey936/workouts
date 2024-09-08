@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-class Comment(Base, CreatedAtOnlyMixin):
+class CommentModel(Base, CreatedAtOnlyMixin):
     __tablename__ = 'comments'
 
     id: Mapped[str] = mapped_column(String(), primary_key=True) # noqa A003
@@ -14,10 +14,10 @@ class Comment(Base, CreatedAtOnlyMixin):
 
     visible: Mapped[bool] = mapped_column(default=True, nullable=False)
 
-    workout: Mapped['Workout'] = relationship(
+    workout: Mapped['WorkoutModel'] = relationship(
         back_populates='comments',
     )
 
-    user: Mapped['User'] = relationship(
+    user: Mapped['UserModel'] = relationship(
         back_populates='comments',
     )

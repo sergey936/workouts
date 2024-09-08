@@ -5,7 +5,7 @@ from infrastructure.db.models.base import (Base, CreatedAtOnlyMixin,
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
-class User(Base, CreatedAtOnlyMixin, UpdatedAtOnlyMixin):
+class UserModel(Base, CreatedAtOnlyMixin, UpdatedAtOnlyMixin):
     __tablename__ = 'users'
 
     id: Mapped[str] = mapped_column(primary_key=True)   # noqa A003
@@ -22,6 +22,6 @@ class User(Base, CreatedAtOnlyMixin, UpdatedAtOnlyMixin):
     role: Mapped[Role] = mapped_column(default=Role.USER)
     is_active: Mapped[bool] = mapped_column(default=True)
 
-    comments: Mapped[list['Comment']] = relationship(
+    comments: Mapped[list['CommentModel']] = relationship(
         back_populates='user',
     )

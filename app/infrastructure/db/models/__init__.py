@@ -1,5 +1,5 @@
 # flake8: noqa
-from .comment import Comment
-from .rating import Rating
-from .user import User
-from .workout import Workout
+from .comment import CommentModel
+from .rating import RatingModel
+from .user import UserModel
+from .workout import WorkoutModel
