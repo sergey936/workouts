@@ -1,3 +1,4 @@
+from application.api.schemas import BaseQueryResponseSchema
 from domain.entities.workout import Workout
 from pydantic import BaseModel
 
@@ -45,3 +46,12 @@ class EditWorkoutSchema(BaseModel):
     workout_id: str
     title: str | None
     description: str | None
+
+
+class WorkoutFilters(BaseModel):
+    limit: int = 10
+    offset: int = 0
+
+
+class GetNotesQueryResponseSchema(BaseQueryResponseSchema[list[WorkoutDetailSchema]]):
+    ...

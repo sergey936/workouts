@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import Iterable
 
 from domain.entities.workout import Workout
 
@@ -11,7 +12,7 @@ class BaseWorkoutRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_workout_by_id(self, user_id: str, workout_id: str) -> Workout | None:
+    async def get_workout_by_id(self, workout_id: str) -> Workout | None:
         ...
 
     @abstractmethod
@@ -24,4 +25,8 @@ class BaseWorkoutRepository(ABC):
 
     @abstractmethod
     async def edit_workout(self, workout_id: str, trainer_id: str, title: str, description: str) -> None:
+        ...
+
+    @abstractmethod
+    async def get_all_user_workouts(self, trainer_id: str, limit: int, offset: int) -> Iterable[Workout]:
         ...

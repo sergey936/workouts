@@ -138,7 +138,7 @@ async def update_user_handler(
 @router.put(
     path='/set-trainer',
     summary='Become a trainer',
-    response_model=UserUpdatedResponseSchema,
+    response_model=UserUpdatedResponseSchema
 )
 async def set_trainer_status_handler(
         user: User = Depends(get_current_user),

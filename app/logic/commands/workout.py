@@ -9,8 +9,10 @@ from infrastructure.services.s3.workout import WorkoutS3Service
 from logic.commands.base import BaseCommand, BaseCommandHandler
 from logic.exceptions.user import (NotTrainerException,
                                    UserNotFoundByEmailException)
-from logic.exceptions.workout import (NotAllowedWorkoutException,
+from logic.exceptions.workout import (InvalidWorkoutFileFormatException,
+                                      NotAllowedWorkoutException,
                                       WorkoutNotFoundException)
+from settings.config import Config
 
 
 @dataclass(frozen=True)
@@ -88,6 +90,7 @@ class UploadWorkoutCommand(BaseCommand):
     workout_id: str
     file: BytesIO
     file_name: str
+    file_format: str
 
 
 @dataclass
@@ -95,9 +98,13 @@ class UploadWorkoutCommandHandler(BaseCommandHandler[UploadWorkoutCommand, Worko
     user_repository: BaseUserRepository
     workout_repository: BaseWorkoutRepository
     s3_service: WorkoutS3Service
+    config: Config
 
     async def handle(self, command: UploadWorkoutCommand) -> Workout:
         user = await self.user_repository.get_user_by_email(email=command.email)
+
+        if command.file_format not in self.config.valid_file_formats:
+            raise InvalidWorkoutFileFormatException()
 
         if not user:
             raise UserNotFoundByEmailException()
@@ -107,7 +114,6 @@ class UploadWorkoutCommandHandler(BaseCommandHandler[UploadWorkoutCommand, Worko
 
         workout = await self.workout_repository.get_workout_by_id(
             workout_id=command.workout_id,
-            user_id=user.oid,
         )
 
         if not workout:

@@ -14,8 +14,8 @@ from sqlalchemy import delete, select, update
 class SQLAlchemyUserRepository(SQLAlchemyRepository, BaseUserRepository):
 
     async def add_user(self, user: UserEntity) -> None:
+        db_user = convert_user_entity_to_db_model(user=user)
         async with self._session() as session:
-            db_user = convert_user_entity_to_db_model(user=user)
             session.add(db_user)
 
             await session.commit()
@@ -29,8 +29,8 @@ class SQLAlchemyUserRepository(SQLAlchemyRepository, BaseUserRepository):
                 return convert_user_db_model_to_entity(user=user)
 
     async def delete_user_by_id(self, user_id: str) -> None:
+        stmt = delete(UserModel).where(UserModel.id == user_id)
         async with self._session() as session:
-            stmt = delete(UserModel).where(UserModel.id == user_id)
             await session.execute(stmt)
             await session.commit()
 
@@ -41,19 +41,19 @@ class SQLAlchemyUserRepository(SQLAlchemyRepository, BaseUserRepository):
             surname: str | None,
             patronymic: str | None,
     ) -> None:
+        stmt = update(UserModel).where(UserModel.id == user_id).values(
+            name=name,
+            surname=surname,
+            patronymic=patronymic,
+        )
         async with self._session() as session:
-            stmt = update(UserModel).where(UserModel.id == user_id).values(
-                name=name,
-                surname=surname,
-                patronymic=patronymic,
-            )
             await session.execute(stmt)
             await session.commit()
 
     async def set_trainer_role(self, user_id: str) -> None:
+        stmt = update(UserModel).where(UserModel.id == user_id).values(
+            role=Role.TRAINER,
+        )
         async with self._session() as session:
-            stmt = update(UserModel).where(UserModel.id == user_id).values(
-                role=Role.TRAINER,
-            )
             await session.execute(stmt)
             await session.commit()

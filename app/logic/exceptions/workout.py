@@ -18,3 +18,11 @@ class NotAllowedWorkoutException(LogicException):
     @property
     def message(self):
         return 'Not your workout.'
+
+
+@dataclass
+class InvalidWorkoutFileFormatException(LogicException):
+
+    @property
+    def message(self):
+        return 'Invalid file format. (valid formats: pdf, txt, docx, jpg, png)'

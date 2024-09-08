@@ -30,6 +30,8 @@ from logic.commands.workout import (CreateWorkoutCommand,
                                     UploadWorkoutCommandHandler)
 from logic.mediator.base import Mediator
 from logic.queries.user import GetCurrentUserQuery, GetCurrentUserQueryHandler
+from logic.queries.workout import (GetAllUserWorkoutsQuery,
+                                   GetAllUserWorkoutsQueryHandler)
 from punq import Container, Scope
 from settings.config import Config
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -128,6 +130,7 @@ def init_container() -> Container:
             user_repository=container.resolve(BaseUserRepository),
             workout_repository=container.resolve(BaseWorkoutRepository),
             s3_service=container.resolve(WorkoutS3Service),
+            config=config,
         )
         edit_workout_command_handler = EditWorkoutCommandHandler(
             _mediator=mediator,
@@ -140,6 +143,12 @@ def init_container() -> Container:
         get_current_user_query_handler = GetCurrentUserQueryHandler(
             user_repository=container.resolve(BaseUserRepository),
             config=config,
+        )
+
+        # Workouts
+        get_all_user_workouts_query_handler = GetAllUserWorkoutsQueryHandler(
+            user_repository=container.resolve(BaseUserRepository),
+            workout_repository=container.resolve(BaseWorkoutRepository),
         )
 
         # register Commands
@@ -194,6 +203,10 @@ def init_container() -> Container:
         mediator.register_query(
             GetCurrentUserQuery,
             get_current_user_query_handler,
+        )
+        mediator.register_query(
+            GetAllUserWorkoutsQuery,
+            get_all_user_workouts_query_handler,
         )
 
         return mediator
