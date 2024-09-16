@@ -35,6 +35,7 @@ class UserCreateSchema(BaseModel):
     surname: str
     patronymic: str
 
+    telegram_id: str | None = None
     email: EmailStr
     password: str
 

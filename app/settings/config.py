@@ -33,6 +33,8 @@ class Config(BaseSettings):
     s3_workout_file_path_form: str = Field(
         default='https://77169c2e-c2cb-4c89-bae5-9015b205f8c6.selstorage.ru/{file_name}')  # noqa E501
 
+    bot_api_key: str = Field(alias='BOT_API_KEY')
+
     @property
     def database_url(self):
         return f'postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?async_fallback=True'  # noqa E501

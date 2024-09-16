@@ -33,3 +33,11 @@ class NotTrainerException(ApplicationException):
     @property
     def message(self):
         return 'You not a trainer'
+
+
+@dataclass
+class UserNotFoundByTgIdException(NotFoundException):
+
+    @property
+    def message(self):
+        return 'User with that tg id not found.'

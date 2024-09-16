@@ -19,6 +19,7 @@ from logic.commands.user import (CreateNewUserCommand,
                                  CreateTrainerCommand,
                                  CreateTrainerCommandHandler,
                                  DeleteUserCommand, DeleteUserCommandHandler,
+                                 SetUserTgIdCommand, SetUserTgIdCommandHandler,
                                  UpdateUserCommand, UpdateUserCommandHandler)
 from logic.commands.workout import (CreateWorkoutCommand,
                                     CreateWorkoutCommandHandler,
@@ -101,6 +102,11 @@ def init_container() -> Container:
             _mediator=mediator,
             user_repository=container.resolve(BaseUserRepository)
         )
+        set_telegram_user_id_command_handler = SetUserTgIdCommandHandler(
+            _mediator=mediator,
+            user_repository=container.resolve(BaseUserRepository),
+            config=config,
+        )
 
         # Auth
         authenticate_user_command_handler = AuthenticateUserCommandHandler(
@@ -168,6 +174,10 @@ def init_container() -> Container:
         mediator.register_command(
             CreateTrainerCommand,
             [create_trainer_command_handler],
+        )
+        mediator.register_command(
+            SetUserTgIdCommand,
+            [set_telegram_user_id_command_handler],
         )
 
         # Auth

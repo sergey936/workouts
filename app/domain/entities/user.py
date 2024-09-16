@@ -29,6 +29,7 @@ class User(BaseEntity):
             patronymic: str,
             email: str,
             password: str,
+            telegram_id: str | None,
     ) -> 'User':
         name = Name(name)
         surname = Surname(surname)
@@ -42,16 +43,17 @@ class User(BaseEntity):
             patronymic=patronymic,
             email=email,
             password=password,
+            telegram_id=telegram_id,
         )
         new_user.register_event(NewUserCreatedEvent)
 
         return new_user
 
-    def change_password(self, password: Password) -> 'User':
+    def change_password(self, password: Password) -> None:
         self.password = password
         self.register_event(UserChangePasswordEvent)
 
-    def change_email(self, email: Email) -> 'User':
+    def change_email(self, email: Email) -> None:
         self.email = email
         self.register_event(UserChangeEmailEvent)
 
@@ -64,7 +66,7 @@ class User(BaseEntity):
             name: str | None = None,
             surname: str | None = None,
             patronymic: str | None = None,
-    ):
+    ) -> 'User':
 
         self.name = Name(name) if name else self.name
         self.surname = Surname(surname) if surname else self.surname
@@ -72,3 +74,9 @@ class User(BaseEntity):
         self.register_event(UserEditEvent)
 
         return self
+
+    def set_tg_id(
+            self,
+            tg_user_id: str,
+    ) -> None:
+        self.telegram_id = tg_user_id

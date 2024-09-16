@@ -32,3 +32,11 @@ class BaseUserRepository(ABC):
             patronymic: str | None,
     ) -> None:
         ...
+
+    @abstractmethod
+    async def get_user_by_telegram_id(self, user_tg_id: str) -> UserEntity | None:
+        ...
+
+    @abstractmethod
+    async def set_user_telegram_id(self, tg_user_id: str, email: str) -> None:
+        ...
