@@ -6,9 +6,10 @@ from application.api.user.schemas import (DeleteUserResponseSchema,
                                           UserUpdatedResponseSchema)
 from domain.entities.user import User
 from domain.exceptions.base import ApplicationException
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from logic.commands.user import (CreateNewUserCommand, CreateTrainerCommand,
-                                 DeleteUserCommand, UpdateUserCommand)
+                                 DeleteUserCommand, SetUserTgIdCommand,
+                                 UpdateUserCommand)
 from logic.exceptions.auth import AuthException
 from logic.exceptions.user import NotFoundException
 from logic.mediator.base import Mediator
@@ -95,10 +96,32 @@ async def delete_user_handler(
     response_model=UserUpdatedResponseSchema,
 )
 async def set_telegram_id_handler(
+        request: Request,
         user: User = Depends(get_current_user),
         container: Container = Depends(),
 ) -> UserUpdatedResponseSchema:
-    raise HTTPException(status_code=400, detail="Not working yet")
+    mediator: Mediator = container.resolve(Mediator)
+
+    try:
+        await mediator.handle_command(
+            SetUserTgIdCommand(
+                email=user.email.as_generic_type(),
+                tg_user_id=request.headers.get('tg-user-id'),
+                bot_api_token=request.headers.get('api-token'),
+
+            )
+        )
+
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
+
+    return UserUpdatedResponseSchema()
 
 
 @router.put(

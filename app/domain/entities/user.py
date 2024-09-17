@@ -5,7 +5,8 @@ from domain.events.user import (NewUserCreatedEvent, UserChangeEmailEvent,
                                 UserChangePasswordEvent, UserDeletedEvent,
                                 UserEditEvent)
 from domain.values.role import Role
-from domain.values.user import Email, Name, Password, Patronymic, Surname
+from domain.values.user import (Email, Name, Password, Patronymic, Surname,
+                                TelegramID)
 
 
 @dataclass
@@ -16,7 +17,7 @@ class User(BaseEntity):
 
     email: Email
     password: Password
-    telegram_id: str | None = None
+    telegram_id: TelegramID | None = None
 
     role: Role = Role.USER
     is_active: bool = True
@@ -47,11 +48,11 @@ class User(BaseEntity):
 
         return new_user
 
-    def change_password(self, password: Password) -> 'User':
+    def change_password(self, password: Password) -> None:
         self.password = password
         self.register_event(UserChangePasswordEvent)
 
-    def change_email(self, email: Email) -> 'User':
+    def change_email(self, email: Email) -> None:
         self.email = email
         self.register_event(UserChangeEmailEvent)
 
@@ -64,7 +65,7 @@ class User(BaseEntity):
             name: str | None = None,
             surname: str | None = None,
             patronymic: str | None = None,
-    ):
+    ) -> 'User':
 
         self.name = Name(name) if name else self.name
         self.surname = Surname(surname) if surname else self.surname
@@ -72,3 +73,9 @@ class User(BaseEntity):
         self.register_event(UserEditEvent)
 
         return self
+
+    def set_tg_id(
+            self,
+            tg_user_id: str,
+    ) -> None:
+        self.telegram_id = TelegramID(tg_user_id)

@@ -68,3 +68,11 @@ class AccessDeniedException(ApplicationException):
     @property
     def message(self):
         return "You can't do this."
+
+
+@dataclass
+class InvalidTelegramIDTypeException(ApplicationException):
+
+    @property
+    def message(self):
+        return 'Telegram id should consist only of numbers'

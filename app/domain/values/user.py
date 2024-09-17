@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from domain.exceptions.user import (EmptyEmailException,
                                     EmptyPasswordException,
                                     EmptyValueException, InvalidEmailException,
+                                    InvalidTelegramIDTypeException,
                                     TooLongValueException,
                                     TooShortValueException,
                                     UnhashedPasswordException)
@@ -98,6 +99,20 @@ class Password(BaseValueObject):
     def is_hashed(self) -> bool:
         pattern = re.compile(r'^[a-f0-9]{64}$', re.IGNORECASE)
         return bool(pattern.match(str(self.value)))
+
+    def as_generic_type(self):
+        if not self.value:
+            return None
+
+        return str(self.value)
+
+
+@dataclass(frozen=True)
+class TelegramID(BaseValueObject):
+    def validate(self):
+
+        if self.value and not str(self.value).isdigit:
+            raise InvalidTelegramIDTypeException()
 
     def as_generic_type(self):
         if not self.value:

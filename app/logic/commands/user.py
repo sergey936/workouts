@@ -5,8 +5,13 @@ from domain.entities.user import User
 from domain.service.password import PasswordService
 from infrastructure.repositories.user.base import BaseUserRepository
 from logic.commands.base import BaseCommand, BaseCommandHandler
+from logic.exceptions.integration import (EmptyUserTGIdException,
+                                          InvalidApiTokenException)
 from logic.exceptions.user import (UserAlreadyExistsException,
-                                   UserNotFoundByEmailException)
+                                   UserAlreadyHaveTelegramIDException,
+                                   UserNotFoundByEmailException,
+                                   UserWithThatTGIdAlreadyExistsException)
+from settings.config import Config
 
 
 @dataclass(frozen=True)
@@ -112,3 +117,42 @@ class CreateTrainerCommandHandler(BaseCommandHandler[CreateTrainerCommand, User]
         await self.user_repository.set_trainer_role(user_id=trainer.oid)
 
         return trainer
+
+
+@dataclass(frozen=True)
+class SetUserTgIdCommand(BaseCommand):
+    email: str
+    tg_user_id: str | None
+    bot_api_token: str | None
+
+
+@dataclass
+class SetUserTgIdCommandHandler(BaseCommandHandler[SetUserTgIdCommand, None]):
+    user_repository: BaseUserRepository
+    config: Config
+
+    async def handle(self, command: SetUserTgIdCommand) -> None:
+        if command.tg_user_id:
+            if not command.bot_api_token or command.bot_api_token != self.config.bot_api_key:
+                raise InvalidApiTokenException()
+
+            user = await self.user_repository.get_user_by_email(email=command.email)
+
+            if not user:
+                raise UserNotFoundByEmailException()
+
+            if await self.user_repository.get_user_by_telegram_id(user_tg_id=command.tg_user_id):
+                raise UserWithThatTGIdAlreadyExistsException()
+
+            if user.telegram_id:
+                raise UserAlreadyHaveTelegramIDException()
+
+            user.set_tg_id(tg_user_id=command.tg_user_id)
+
+            await self.user_repository.set_user_telegram_id(
+                tg_user_id=command.tg_user_id,
+                email=command.email,
+            )
+
+            return user
+        raise EmptyUserTGIdException()

@@ -12,12 +12,12 @@ class UserModel(Base, CreatedAtOnlyMixin, UpdatedAtOnlyMixin):
 
     name: Mapped[str]
     surname: Mapped[str]
-    patronymic: Mapped[str]
+    patronymic: Mapped[str | None]
 
-    password: Mapped[str]
-    email: Mapped[str]
+    password: Mapped[str | None]
+    email: Mapped[str | None] = mapped_column(unique=True)
 
-    telegram_id: Mapped[int | None]
+    telegram_id: Mapped[str | None] = mapped_column(unique=True)
 
     role: Mapped[Role] = mapped_column(default=Role.USER)
     is_active: Mapped[bool] = mapped_column(default=True)
