@@ -8,7 +8,9 @@ from logic.commands.base import BaseCommand, BaseCommandHandler
 from logic.exceptions.integration import (EmptyUserTGIdException,
                                           InvalidApiTokenException)
 from logic.exceptions.user import (UserAlreadyExistsException,
-                                   UserNotFoundByEmailException)
+                                   UserAlreadyHaveTelegramIDException,
+                                   UserNotFoundByEmailException,
+                                   UserWithThatTGIdAlreadyExistsException)
 from settings.config import Config
 
 
@@ -19,7 +21,6 @@ class CreateNewUserCommand(BaseCommand):
     patronymic: str
     email: str
     password: str
-    telegram_id: str | None = None
 
 
 @dataclass
@@ -41,7 +42,6 @@ class CreateNewUserCommandHandler(BaseCommandHandler[CreateNewUserCommand, None]
             patronymic=command.patronymic,
             email=command.email,
             password=hash_password,
-            telegram_id=command.telegram_id,
         )
 
         await self.user_repository.add_user(user=user)
@@ -140,6 +140,12 @@ class SetUserTgIdCommandHandler(BaseCommandHandler[SetUserTgIdCommand, None]):
 
             if not user:
                 raise UserNotFoundByEmailException()
+
+            if await self.user_repository.get_user_by_telegram_id(user_tg_id=command.tg_user_id):
+                raise UserWithThatTGIdAlreadyExistsException()
+
+            if user.telegram_id:
+                raise UserAlreadyHaveTelegramIDException()
 
             user.set_tg_id(tg_user_id=command.tg_user_id)
 

@@ -46,7 +46,6 @@ async def create_user_handler(
                 patronymic=schema.patronymic,
                 email=schema.email,
                 password=schema.password,
-                telegram_id=schema.telegram_id,
             ),
         )
     except AuthException as auth_error:

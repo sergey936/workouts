@@ -24,4 +24,4 @@ class EmptyUserTGIdException(IntegrationException):
 
     @property
     def message(self):
-        return 'Query dont have user tg id.'
+        return 'Request dont have user tg id.'
