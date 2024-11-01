@@ -2,11 +2,10 @@ from dataclasses import dataclass
 
 from domain.entities.base import BaseEntity
 from domain.entities.trainer import Trainer
-from domain.events.workout import NewWorkoutCreatedEvent, DeleteWorkoutEvent
+from domain.events.workout import DeleteWorkoutEvent, NewWorkoutCreatedEvent
 from domain.exceptions.user import AccessDeniedException
 from domain.values.role import Role
-from domain.values.trainer import Like, Rating
-from domain.values.workout import Title, Text, Price
+from domain.values.workout import Price, Text, Title
 
 
 @dataclass
@@ -15,54 +14,58 @@ class Workout(BaseEntity):
 
     title: Title
     description: Text
-    likes: Like
-    rating: Rating
+    file_path: str | None = None
 
     is_active: bool = True
-
     price: Price | None = None
 
+    @classmethod
     def create_workout(
-            self,
+            cls,
             trainer: Trainer,
-            title: Title,
-            description: Text,
-            likes: Like,
-            rating: Rating,
-            price: Price | None
-    ):
-        if trainer.role == Role.trainer:
-            self._events.append(NewWorkoutCreatedEvent)
-            return Workout(
+            title: str,
+            description: str,
+            price: Price | None = None,
+    ) -> 'Workout':
+        if trainer.role == Role.TRAINER:
+
+            new_workout = Workout(
                 trainer_oid=trainer.oid,
-                title=title,
-                description=description,
-                likes=likes,
-                rating=rating,
-                price=price
+                title=Title(title),
+                description=Text(description),
+                price=price,
             )
+            new_workout.register_event(NewWorkoutCreatedEvent)
+
+            return new_workout
+
         raise AccessDeniedException()
 
     def delete_workout(
             self,
             trainer: Trainer,
     ):
-        if trainer.role == Role.trainer:
+        if trainer.role == Role.TRAINER:
             if self.trainer_oid == trainer.oid:
                 self.is_active = False
-                self._events.append(DeleteWorkoutEvent)
+                self.register_event(DeleteWorkoutEvent)
 
         raise AccessDeniedException()
 
     def edit_workout(
             self,
             trainer: Trainer,
-            title: Title | None = None,
-            description: Text | None = None
+            title: str | None = None,
+            description: str | None = None,
     ):
-        if trainer.role == Role.trainer:
-            if self.trainer_oid == trainer.oid:
-                self.title = title if title else self.title
-                self.description = description if description else self.description
+        if trainer.role != Role.TRAINER:
+            raise AccessDeniedException()
 
-        raise AccessDeniedException()
+        if self.trainer_oid != trainer.oid:
+            raise AccessDeniedException()
+
+        self.title = Title(title) if title else self.title
+        self.description = Text(description) if description else self.description
+
+    def set_file_path(self, file_path: str):
+        self.file_path = file_path

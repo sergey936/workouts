@@ -6,7 +6,7 @@ from domain.events.base import BaseEvent
 
 @dataclass
 class NewUserCreatedEvent(BaseEvent):
-    event_title: ClassVar[str] = 'New user created'
+    event_title: ClassVar[str] = 'New USER created'
 
     user_oid: str
 
@@ -53,7 +53,3 @@ class UserEditEvent(BaseEvent):
     event_title: ClassVar[str] = 'User edited'
 
     user_oid: str
-
-
-
-

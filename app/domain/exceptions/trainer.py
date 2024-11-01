@@ -56,4 +56,4 @@ class AlreadyTrainerException(ApplicationException):
 
     @property
     def message(self):
-        return "You already registered as trainer"
+        return "You already registered as TRAINER"

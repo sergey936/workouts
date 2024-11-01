@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
-from domain.exceptions.trainer import EmptyLikeException, NegativeLikeException, EmptyDislikeException, \
-    NegativeDislikeException, EmptyRatingException, NegativeRatingException
+from domain.exceptions.trainer import (EmptyDislikeException,
+                                       EmptyLikeException,
+                                       NegativeDislikeException,
+                                       NegativeLikeException)
 from domain.values.base import BaseValueObject
 
 
@@ -15,6 +17,9 @@ class Like(BaseValueObject):
             raise NegativeLikeException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return int(self.value)
 
 
@@ -28,17 +33,7 @@ class DisLike(BaseValueObject):
             raise NegativeDislikeException()
 
     def as_generic_type(self):
-        return int(self.value)
+        if not self.value:
+            return None
 
-
-@dataclass(frozen=True)
-class Rating(BaseValueObject):
-    def validate(self):
-        if not self.value():
-            raise EmptyRatingException()
-
-        if int(self.value) < 0:
-            raise NegativeRatingException()
-
-    def as_generic_type(self):
         return int(self.value)

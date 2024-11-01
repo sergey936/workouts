@@ -1,0 +1,57 @@
+version: '3.9'
+
+services:
+  main-app:
+    build:
+      context: ..
+      dockerfile: dockerfile
+    container_name: workout_app
+    depends_on:
+      - pg_db
+      - pgadmin
+    ports:
+      - "${API_PORT}:8000"
+    command: ['sh', 'app.sh']
+    env_file:
+      - ../.env
+    volumes:
+      - ../app/:/app/
+    networks:
+      - backend
+
+  pg_db:
+    image: postgres:12.19-alpine3.20
+
+    container_name: db
+
+    environment:
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASS}
+
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+
+  pgadmin:
+    container_name: pgadmin_app
+    image: dpage/pgadmin4
+
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "5050:80"
+    networks:
+      - backend
+
+volumes:
+  db_volume:
+networks:
+  backend:
+    driver: bridge

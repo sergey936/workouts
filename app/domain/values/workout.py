@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from domain.exceptions.workout import (
-    TooLongTitleException, EmptyTitleException,
-    EmptyTextException, TooLongTextException, NegativePriceException
-)
+from domain.exceptions.workout import (EmptyTextException, EmptyTitleException,
+                                       NegativePriceException,
+                                       TooLongTextException,
+                                       TooLongTitleException)
 from domain.values.base import BaseValueObject
 
 
@@ -17,6 +17,9 @@ class Title(BaseValueObject):
             raise TooLongTitleException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)
 
 
@@ -30,6 +33,9 @@ class Text(BaseValueObject):
             raise TooLongTextException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return str(self.value)
 
 
@@ -41,4 +47,7 @@ class Price(BaseValueObject):
             raise NegativePriceException()
 
     def as_generic_type(self):
+        if not self.value:
+            return None
+
         return int(self.value)

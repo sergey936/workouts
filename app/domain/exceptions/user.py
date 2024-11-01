@@ -22,6 +22,15 @@ class TooLongValueException(ApplicationException):
 
 
 @dataclass
+class TooShortValueException(ApplicationException):
+    text: str
+
+    @property
+    def message(self):
+        return f"{self.text} too short."
+
+
+@dataclass
 class EmptyEmailException(ApplicationException):
 
     @property
@@ -61,3 +70,9 @@ class AccessDeniedException(ApplicationException):
         return "You can't do this."
 
 
+@dataclass
+class InvalidTelegramIDTypeException(ApplicationException):
+
+    @property
+    def message(self):
+        return 'Telegram id should consist only of numbers'
