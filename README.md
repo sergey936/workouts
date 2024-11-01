@@ -19,3 +19,9 @@
 ### Api дока
 ![image](https://github.com/user-attachments/assets/1de22c10-7f0e-40bf-bb4c-954e6f8b0b62)
 
+### Запуск
+***
+* Спулить проект
+* создать .env в папке проекта
+* запуск - make app
+***
