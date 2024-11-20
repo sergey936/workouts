@@ -36,7 +36,6 @@ async def login_for_access_token_handler(
             CreateAccessTokenCommand(
                 data={
                     "email": user.email.as_generic_type(),
-                    "telegram_id": user.telegram_id,
                 },
             ),
         )

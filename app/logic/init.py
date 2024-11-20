@@ -30,7 +30,10 @@ from logic.commands.workout import (CreateWorkoutCommand,
                                     UploadWorkoutCommand,
                                     UploadWorkoutCommandHandler)
 from logic.mediator.base import Mediator
-from logic.queries.user import GetCurrentUserQuery, GetCurrentUserQueryHandler
+from logic.queries.user import (CheckUserExistsByTgIdQuery,
+                                CheckUserExistsByTgIdQueryHandler,
+                                GetCurrentUserQuery,
+                                GetCurrentUserQueryHandler)
 from logic.queries.workout import (GetAllUserWorkoutsQuery,
                                    GetAllUserWorkoutsQueryHandler,
                                    GetAllWorkoutsQuery,
@@ -152,7 +155,10 @@ def init_container() -> Container:
             user_repository=container.resolve(BaseUserRepository),
             config=config,
         )
-
+        check_user_exists_by_tg_id_query_handler = CheckUserExistsByTgIdQueryHandler(
+                user_repository=container.resolve(BaseUserRepository),
+                config=config,
+            )
         # Workouts
         get_all_user_workouts_query_handler = GetAllUserWorkoutsQueryHandler(
             user_repository=container.resolve(BaseUserRepository),
@@ -221,6 +227,11 @@ def init_container() -> Container:
             get_current_user_query_handler,
         )
         # Workout
+        mediator.register_query(
+            CheckUserExistsByTgIdQuery,
+            check_user_exists_by_tg_id_query_handler,
+        )
+        # Workouts
         mediator.register_query(
             GetAllUserWorkoutsQuery,
             get_all_user_workouts_query_handler,

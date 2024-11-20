@@ -17,20 +17,28 @@ class GetCurrentUserQuery(BaseQuery):
 
 
 @dataclass
-class GetCurrentUserQueryHandler(BaseQueryHandler[GetCurrentUserQuery, User]):
+class GetCurrentUserQueryHandler(
+    BaseQueryHandler[GetCurrentUserQuery, User | None]
+):
     user_repository: BaseUserRepository
     config: Config
 
-    async def handle(self, query: GetCurrentUserQuery) -> User:
+    async def handle(self, query: GetCurrentUserQuery) -> User | None:
         if query.tg_user_id and query.bot_api_token:
             if query.bot_api_token == self.config.bot_api_key:
-                user = await self.user_repository.get_user_by_telegram_id(user_tg_id=query.tg_user_id)
+                user = await self.user_repository.get_user_by_telegram_id(
+                    user_tg_id=query.tg_user_id,
+                )
 
                 if user:
                     return user
 
         try:
-            payload = jwt.decode(query.token, self.config.secret_key, algorithms=[self.config.algorithm])
+            payload = jwt.decode(
+                query.token,
+                self.config.secret_key,
+                algorithms=[self.config.algorithm],
+            )
             email: str = payload.get("email")
 
             if not email:
@@ -45,3 +53,26 @@ class GetCurrentUserQueryHandler(BaseQueryHandler[GetCurrentUserQuery, User]):
             raise CredentialsException()
 
         return user
+
+
+@dataclass
+class CheckUserExistsByTgIdQuery(BaseQuery):
+    bot_api_token: str
+    tg_user_id: str
+
+
+@dataclass
+class CheckUserExistsByTgIdQueryHandler(
+    BaseQueryHandler[CheckUserExistsByTgIdQuery, bool]
+):
+    user_repository: BaseUserRepository
+    config: Config
+
+    async def handle(self, query: CheckUserExistsByTgIdQuery) -> bool:
+        if query.tg_user_id and query.bot_api_token:
+            if query.bot_api_token == self.config.bot_api_key:
+                user = await self.user_repository.get_user_by_telegram_id(user_tg_id=query.tg_user_id)
+
+                if user:
+                    return True
+        return False

@@ -24,7 +24,6 @@ class UserResponseSchema(BaseModel):
             surname=user.surname.as_generic_type(),
             patronymic=user.patronymic.as_generic_type(),
             email=user.email.as_generic_type(),
-            telegram_id=user.telegram_id,
             role=user.role,
             is_active=user.is_active,
         )
@@ -59,3 +58,7 @@ class DeleteUserResponseSchema(BaseModel):
 
 class UserUpdatedResponseSchema(BaseModel):
     response: str = 'User Updated'
+
+
+class UserExistsResponseSchema(BaseModel):
+    exists: bool
