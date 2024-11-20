@@ -68,3 +68,19 @@ class SQLAlchemyWorkoutRepository(SQLAlchemyRepository, BaseWorkoutRepository):
             workouts = await session.scalars(query)
 
         return [convert_db_model_to_workout_entity(workout=workout) for workout in workouts]
+
+    async def get_workouts_asc_order(self, limit: int, offset: int, desc: bool) -> Iterable[Workout]:
+        query = select(WorkoutModel).where(WorkoutModel.is_active == True).order_by(WorkoutModel.title)
+
+        async with self._session() as session:
+            workouts = await session.scalars(query)
+
+        return [convert_db_model_to_workout_entity(workout=workout) for workout in workouts]
+
+    async def get_workouts_desc_order(self, limit: int, offset: int, desc: bool) -> Iterable[Workout]:
+        query = select(WorkoutModel).where(WorkoutModel.is_active == True).order_by(WorkoutModel.title.desc())
+
+        async with self._session() as session:
+            workouts = await session.scalars(query)
+
+        return [convert_db_model_to_workout_entity(workout=workout) for workout in workouts]

@@ -30,3 +30,11 @@ class BaseWorkoutRepository(ABC):
     @abstractmethod
     async def get_all_user_workouts(self, trainer_id: str, limit: int, offset: int) -> Iterable[Workout]:
         ...
+
+    @abstractmethod
+    async def get_workouts_asc_order(self, limit: int, offset: int, desc: bool) -> Iterable[Workout]:
+        ...
+
+    @abstractmethod
+    async def get_workouts_desc_order(self, limit: int, offset: int, desc: bool) -> Iterable[Workout]:
+        ...

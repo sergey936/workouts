@@ -20,16 +20,52 @@ class GetAllUserWorkoutsQueryHandler(BaseQueryHandler[GetAllUserWorkoutsQuery, I
     user_repository: BaseUserRepository
     workout_repository: BaseWorkoutRepository
 
-    async def handle(self, command: GetAllUserWorkoutsQuery) -> Iterable[Workout]:
-        user = await self.user_repository.get_user_by_email(email=command.email)
+    async def handle(self, query: GetAllUserWorkoutsQuery) -> Iterable[Workout]:
+        user = await self.user_repository.get_user_by_email(email=query.email)
 
         if not user:
             raise UserNotFoundByEmailException()
 
         workouts = await self.workout_repository.get_all_user_workouts(
             trainer_id=user.oid,
-            limit=command.limit,
-            offset=command.offset,
+            limit=query.limit,
+            offset=query.offset,
         )
+
+        return workouts
+
+
+
+@dataclass
+class GetAllWorkoutsQuery(BaseQuery):
+    limit: int
+    offset: int
+    email: str
+    desc: bool
+
+
+@dataclass
+class GetAllWorkoutsQueryHandler(BaseQueryHandler[GetAllWorkoutsQuery, Iterable[Workout]]):
+    user_repository: BaseUserRepository
+    workout_repository: BaseWorkoutRepository
+
+    async def handle(self, query: GetAllWorkoutsQuery) -> Iterable[Workout]:
+        user = await self.user_repository.get_user_by_email(email=query.email)
+
+        if not user:
+            raise UserNotFoundByEmailException()
+
+        if not query.desc:
+            workouts = await self.workout_repository.get_workouts_asc_order(
+                limit=query.limit,
+                offset=query.offset,
+                desc=query.desc,
+            )
+        else:
+            workouts = await self.workout_repository.get_workouts_desc_order(
+                limit=query.limit,
+                offset=query.offset,
+                desc=query.desc,
+            )
 
         return workouts
