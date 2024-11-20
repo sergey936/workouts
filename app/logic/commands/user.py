@@ -144,7 +144,7 @@ class SetUserTgIdCommandHandler(BaseCommandHandler[SetUserTgIdCommand, None]):
             if await self.user_repository.get_user_by_telegram_id(user_tg_id=command.tg_user_id):
                 raise UserWithThatTGIdAlreadyExistsException()
 
-            if user.telegram_id:
+            if user.telegram_id.as_generic_type():
                 raise UserAlreadyHaveTelegramIDException()
 
             user.set_tg_id(tg_user_id=command.tg_user_id)

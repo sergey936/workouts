@@ -2,7 +2,9 @@ from application.api.auth.utils import get_current_user
 from application.api.user.schemas import (DeleteUserResponseSchema,
                                           UpdateUserRequestSchema,
                                           UserCreateResponseSchema,
-                                          UserCreateSchema, UserResponseSchema,
+                                          UserCreateSchema,
+                                          UserExistsResponseSchema,
+                                          UserResponseSchema,
                                           UserUpdatedResponseSchema)
 from domain.entities.user import User
 from domain.exceptions.base import ApplicationException
@@ -13,6 +15,7 @@ from logic.commands.user import (CreateNewUserCommand, CreateTrainerCommand,
 from logic.exceptions.auth import AuthException
 from logic.exceptions.user import NotFoundException
 from logic.mediator.base import Mediator
+from logic.queries.user import CheckUserExistsByTgIdQuery
 from punq import Container
 
 router = APIRouter()
@@ -108,7 +111,6 @@ async def set_telegram_id_handler(
                 email=user.email.as_generic_type(),
                 tg_user_id=request.headers.get('tg-user-id'),
                 bot_api_token=request.headers.get('api-token'),
-
             )
         )
 
@@ -159,7 +161,7 @@ async def update_user_handler(
 
 
 @router.put(
-    path='/set-trainer',
+    path='/trainer',
     summary='Become a trainer',
     response_model=UserUpdatedResponseSchema
 )
@@ -186,3 +188,34 @@ async def set_trainer_status_handler(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
 
     return UserUpdatedResponseSchema()
+
+
+@router.get(
+    path='/exists',
+    summary='Check user exists by tg id',
+    response_model=UserExistsResponseSchema
+)
+async def check_user_exists_handler(
+        request: Request,
+        container: Container = Depends(),
+) -> UserExistsResponseSchema:
+    mediator: Mediator = container.resolve(Mediator)
+
+    try:
+        exists = await mediator.handle_query(
+            CheckUserExistsByTgIdQuery(
+                bot_api_token=request.headers.get('api-token'),
+                tg_user_id=request.headers.get('tg-user-id')
+            )
+        )
+
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
+
+    return UserExistsResponseSchema(exists=exists)
