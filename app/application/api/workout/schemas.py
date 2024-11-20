@@ -51,7 +51,8 @@ class EditWorkoutSchema(BaseModel):
 class WorkoutFilters(BaseModel):
     limit: int = 10
     offset: int = 0
+    order: bool = False
 
 
-class GetNotesQueryResponseSchema(BaseQueryResponseSchema[list[WorkoutDetailSchema]]):
+class GetWorkoutsQueryResponseSchema(BaseQueryResponseSchema[list[WorkoutDetailSchema]]):
     ...
