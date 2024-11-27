@@ -15,7 +15,7 @@ from logic.commands.workout import (CreateWorkoutCommand, DeleteWorkoutCommand,
 from logic.exceptions.auth import AuthException
 from logic.exceptions.user import NotFoundException
 from logic.mediator.base import Mediator
-from logic.queries.workout import GetAllUserWorkoutsQuery, GetAllWorkoutsQuery
+from logic.queries.workout import GetAllUserWorkoutsQuery, GetAllWorkoutsQuery, GetWorkoutInfoQuery
 from punq import Container
 
 router = APIRouter()
@@ -27,7 +27,7 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     response_model=WorkoutDetailSchema,
 )
-async def create_workout(
+async def create_workout_handler(
         schema: CreateWorkoutSchema,
         user: User = Depends(get_current_user),
         container: Container = Depends(),
@@ -60,7 +60,7 @@ async def create_workout(
     status_code=status.HTTP_200_OK,
     response_model=DeleteWorkoutResponseSchema,
 )
-async def delete_workout(
+async def delete_workout_handler(
         schema: DeleteWorkoutSchema,
         user: User = Depends(get_current_user),
         container: Container = Depends(),
@@ -92,7 +92,7 @@ async def delete_workout(
     status_code=status.HTTP_200_OK,
     response_model=WorkoutDetailSchema,
 )
-async def upload_workout_file(
+async def upload_workout_file_handler(
         schema: UploadWorkoutFileSchema = Depends(),
         file: UploadFile = File(...),
         user: User = Depends(get_current_user),
@@ -128,7 +128,7 @@ async def upload_workout_file(
     status_code=status.HTTP_200_OK,
     response_model=WorkoutDetailSchema,
 )
-async def edit_workout(
+async def edit_workout_handler(
         schema: EditWorkoutSchema,
         user: User = Depends(get_current_user),
         container: Container = Depends(),
@@ -162,7 +162,7 @@ async def edit_workout(
     status_code=status.HTTP_200_OK,
     response_model=GetWorkoutsQueryResponseSchema,
 )
-async def get_all_current_user_workouts(
+async def get_all_current_user_workouts_handler(
         filters: WorkoutFilters = Depends(),
         user: User = Depends(get_current_user),
         container: Container = Depends(),
@@ -199,7 +199,7 @@ async def get_all_current_user_workouts(
     status_code=status.HTTP_200_OK,
     response_model=GetWorkoutsQueryResponseSchema,
 )
-async def get_all_workouts(
+async def get_all_workouts_handler(
         filters: WorkoutFilters = Depends(),
         user: User = Depends(get_current_user),
         container: Container = Depends(),
@@ -229,3 +229,33 @@ async def get_all_workouts(
         offset=filters.offset,
         items=[WorkoutDetailSchema.from_entity(workout) for workout in workouts]
     )
+
+@router.get(
+    path='/{workout_id}',
+    description='Get workout info',
+    status_code=status.HTTP_200_OK,
+    response_model=WorkoutDetailSchema,
+)
+async def get_workout_info_handler(
+        workout_id: str,
+        user: User = Depends(get_current_user),
+        container: Container = Depends(),
+) -> WorkoutDetailSchema:
+    mediator: Mediator = container.resolve(Mediator)
+    try:
+        workout = await mediator.handle_query(
+            GetWorkoutInfoQuery(
+                workout_id=workout_id,
+            )
+        )
+
+    except AuthException as auth_error:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail={'error': auth_error.message})
+
+    except NotFoundException as not_found_error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': not_found_error.message})
+
+    except ApplicationException as app_error:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'error': app_error.message})
+
+    return WorkoutDetailSchema.from_entity(workout=workout)

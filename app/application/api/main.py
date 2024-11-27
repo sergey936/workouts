@@ -17,6 +17,6 @@ def init_api_v1() -> FastAPI:
 
     app.include_router(router=UserRouter, prefix='/users', tags=['Users'])
     app.include_router(router=AuthRouter, prefix='/auth', tags=['Auth'])
-    app.include_router(router=WokroutRouter, prefix='/Workouts', tags=['Workout'])
+    app.include_router(router=WokroutRouter, prefix='/workouts', tags=['Workout'])
 
     return app

@@ -5,7 +5,8 @@ from domain.entities.workout import Workout
 from infrastructure.repositories.user.base import BaseUserRepository
 from infrastructure.repositories.workout.base import BaseWorkoutRepository
 from logic.exceptions.user import UserNotFoundByEmailException
-from logic.queries.base import BaseQuery, BaseQueryHandler
+from logic.exceptions.workout import WorkoutNotFoundException
+from logic.queries.base import BaseQuery, BaseQueryHandler, QT
 
 
 @dataclass
@@ -69,3 +70,21 @@ class GetAllWorkoutsQueryHandler(BaseQueryHandler[GetAllWorkoutsQuery, Iterable[
             )
 
         return workouts
+
+
+@dataclass
+class GetWorkoutInfoQuery(BaseQuery):
+    workout_id: str
+
+
+@dataclass
+class GetWorkoutInfoQueryHandler(BaseQueryHandler[GetWorkoutInfoQuery, Workout]):
+    workout_repository: BaseWorkoutRepository
+
+    async def handle(self, query: GetWorkoutInfoQuery) -> Workout:
+        workout = await self.workout_repository.get_workout_by_id(workout_id=query.workout_id)
+
+        if not workout:
+            raise WorkoutNotFoundException()
+
+        return workout
